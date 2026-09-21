@@ -1,0 +1,1384 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Проверка стабильности интернета</title>
+<style>
+  :root {
+    --bg: #f4f6f8;
+    --card-bg: #ffffff;
+    --text: #1f2430;
+    --muted: #6b7280;
+    --accent: #2563eb;
+    --accent-hover: #1d4ed8;
+    --accent-disabled: #a9c2f4;
+    --result-bg: #f4f6f8;
+    --border: #e5e7eb;
+    --status-idle: #f5f5f5;
+    --status-idle-text: #333;
+    --status-running: #eef2ff;
+    --status-running-text: #3730a3;
+    --status-excellent: #e6f7ec;
+    --status-excellent-text: #166534;
+    --status-good: #e8f0fe;
+    --status-good-text: #1d4ed8;
+    --status-fair: #fff6e0;
+    --status-fair-text: #92610a;
+    --status-poor: #fdeaea;
+    --status-poor-text: #b91c1c;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f1115;
+      --card-bg: #1a1d24;
+      --text: #e5e7eb;
+      --muted: #9aa1ad;
+      --result-bg: #20242c;
+      --border: #2a2e37;
+      --status-idle: #20242c;
+      --status-idle-text: #d1d5db;
+      --status-running: #1c2340;
+      --status-running-text: #a5b4fc;
+      --status-excellent: #10281c;
+      --status-excellent-text: #4ade80;
+      --status-good: #142440;
+      --status-good-text: #93c5fd;
+      --status-fair: #332707;
+      --status-fair-text: #fbbf24;
+      --status-poor: #2e1414;
+      --status-poor-text: #fca5a5;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #0f1115;
+    --card-bg: #1a1d24;
+    --text: #e5e7eb;
+    --muted: #9aa1ad;
+    --result-bg: #20242c;
+    --border: #2a2e37;
+    --status-idle: #20242c;
+    --status-idle-text: #d1d5db;
+    --status-running: #1c2340;
+    --status-running-text: #a5b4fc;
+    --status-excellent: #10281c;
+    --status-excellent-text: #4ade80;
+    --status-good: #142440;
+    --status-good-text: #93c5fd;
+    --status-fair: #332707;
+    --status-fair-text: #fbbf24;
+    --status-poor: #2e1414;
+    --status-poor-text: #fca5a5;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    background: var(--bg);
+  }
+
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+    color: var(--text);
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 20px 60px;
+  }
+
+  h1 {
+    text-align: center;
+    margin: 20px 0 8px;
+    font-size: 26px;
+  }
+
+  .description {
+    text-align: center;
+    color: var(--muted);
+    margin-bottom: 30px;
+  }
+
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 15px;
+    padding: 28px;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.06);
+  }
+
+  .status-box {
+    padding: 22px;
+    text-align: center;
+    border-radius: 12px;
+    background: var(--status-idle);
+    color: var(--status-idle-text);
+    transition: background 0.3s ease, color 0.3s ease;
+  }
+
+  .status-box .dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: currentColor;
+    margin-right: 8px;
+    vertical-align: middle;
+  }
+
+  .status { font-size: 22px; font-weight: 700; }
+  .status-description { margin-top: 8px; font-size: 15px; opacity: 0.85; }
+
+  .duration-select {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin: 22px 0 6px;
+    flex-wrap: wrap;
+  }
+
+  .duration-select button {
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text);
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+
+  .duration-select button.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+
+  .main-actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-top: 18px;
+    flex-wrap: wrap;
+  }
+
+  .target-select {
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--card-bg);
+    color: var(--text);
+    font-size: 14px;
+    cursor: pointer;
+  }
+  .target-select:disabled { color: var(--muted); cursor: not-allowed; }
+
+  .button {
+    padding: 15px 40px;
+    border: none;
+    border-radius: 10px;
+    background: var(--accent);
+    color: white;
+    font-size: 17px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .button:hover:not(:disabled) { background: var(--accent-hover); }
+  .button:disabled { background: var(--accent-disabled); cursor: not-allowed; }
+
+  .progress-wrap {
+    margin-top: 18px;
+    height: 8px;
+    border-radius: 4px;
+    background: var(--result-bg);
+    overflow: hidden;
+  }
+
+  .progress-bar {
+    height: 100%;
+    width: 0%;
+    background: var(--accent);
+    transition: width 0.3s linear;
+  }
+
+  .timer {
+    text-align: center;
+    font-size: 15px;
+    color: var(--muted);
+    margin-top: 8px;
+  }
+
+  .results {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    margin-top: 26px;
+  }
+
+  .result {
+    background: var(--result-bg);
+    border-radius: 10px;
+    padding: 16px 8px;
+    text-align: center;
+  }
+
+  .result-title { color: var(--muted); font-size: 12.5px; }
+  .result-value { font-size: 20px; font-weight: 700; margin-top: 6px; }
+
+  @media (max-width: 640px) {
+    .results { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  .chart-container {
+    margin-top: 26px;
+    position: relative;
+    height: 240px;
+  }
+  .chart-container canvas { width: 100% !important; height: 100% !important; }
+
+  .section-title {
+    margin: 30px 0 10px;
+    font-size: 15px;
+    font-weight: 700;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .link-btn {
+    background: none;
+    border: none;
+    color: var(--accent);
+    cursor: pointer;
+    font-size: 13px;
+    padding: 0;
+  }
+  .link-btn:disabled { color: var(--muted); cursor: not-allowed; }
+
+  table.history {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  table.history th, table.history td {
+    text-align: center;
+    padding: 8px 6px;
+    border-bottom: 1px solid var(--border);
+  }
+  table.history th { color: var(--muted); font-weight: 600; }
+
+  /* Полная история: окно на 15 строк + вертикальная прокрутка с ползунком справа */
+  .history-scroll {
+    overflow-y: auto;
+    overflow-x: hidden;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+  }
+  .history-scroll:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .history-scroll table.history thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: var(--card-bg);
+    box-shadow: 0 1px 0 var(--border);
+  }
+  .history-scroll table.history tbody tr:last-child td { border-bottom: none; }
+
+  /* Ползунок всегда виден (в том числе на телефонах), им можно управлять пальцем/мышью */
+  .history-scroll::-webkit-scrollbar { width: 16px; }
+  .history-scroll::-webkit-scrollbar-track { background: var(--result-bg); }
+  .history-scroll::-webkit-scrollbar-thumb {
+    background: var(--muted);
+    border-radius: 8px;
+    border: 4px solid var(--result-bg);
+    min-height: 40px;
+  }
+  .history-scroll::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+  @supports not selector(::-webkit-scrollbar) {
+    .history-scroll { scrollbar-width: auto; scrollbar-color: var(--muted) var(--result-bg); }
+  }
+
+  .history-toggle { text-align: center; margin-top: 12px; }
+
+  .empty-history {
+    color: var(--muted);
+    font-size: 13px;
+    text-align: center;
+    padding: 16px 0;
+  }
+
+  .quality-pill {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .advice-banner {
+    padding: 14px 16px;
+    border-radius: 10px;
+    background: var(--result-bg);
+    color: var(--text);
+    font-size: 14px;
+    margin-bottom: 14px;
+  }
+
+  .advice-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 10px;
+  }
+
+  .advice-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 14px;
+    padding: 12px 14px;
+    background: var(--result-bg);
+    border-radius: 10px;
+    transition: outline 0.2s ease;
+  }
+
+  .advice-list li .num {
+    flex: none;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .advice-list li.highlight {
+    outline: 2px solid var(--accent);
+  }
+
+  details.glossary-item {
+    border-bottom: 1px solid var(--border);
+    padding: 10px 2px;
+  }
+  details.glossary-item:last-child { border-bottom: none; }
+
+  details.glossary-item summary {
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14.5px;
+    list-style: none;
+  }
+  details.glossary-item summary::-webkit-details-marker { display: none; }
+  details.glossary-item summary::before {
+    content: "+ ";
+    color: var(--accent);
+  }
+  details.glossary-item[open] summary::before {
+    content: "− ";
+  }
+
+  details.glossary-item p {
+    margin: 8px 0 2px;
+    font-size: 13.5px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .auto-repeat-row {
+    text-align: center;
+    margin-top: 14px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .auto-repeat-row label {
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .auto-repeat-row input { cursor: pointer; }
+
+  .delta {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    margin-top: 4px;
+    padding: 1px 6px;
+    border-radius: 999px;
+  }
+  .delta.better { color: #166534; background: #e6f7ec; }
+  .delta.worse { color: #b91c1c; background: #fdeaea; }
+  .delta.same { color: var(--muted); background: var(--result-bg); }
+
+  .secondary-note {
+    font-size: 12.5px;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+
+  .secondary-actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 4px;
+  }
+
+  .secondary-button {
+    padding: 9px 22px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text);
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  .secondary-button:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+  .secondary-button:disabled { color: var(--muted); cursor: not-allowed; }
+
+  /* ---------- Переключатель языка ---------- */
+  .topbar {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+
+  .lang-select {
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--card-bg);
+    color: var(--text);
+    font-size: 14px;
+    cursor: pointer;
+    max-width: 100%;
+  }
+  .lang-select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* ---------- Footer ---------- */
+  .site-footer {
+    margin-top: 26px;
+    text-align: center;
+    font-size: 13.5px;
+    color: var(--muted);
+  }
+  .site-footer a {
+    color: var(--accent);
+    text-decoration: none;
+    word-break: break-word;
+  }
+  .site-footer a:hover { text-decoration: underline; }
+
+  @media (max-width: 480px) {
+    .topbar { justify-content: center; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <div class="topbar">
+    <select class="lang-select" id="langSelect" data-i18n-aria="lang.aria" data-i18n-title="lang.aria">
+      <option value="ru">Русский</option>
+      <option value="en">English</option>
+      <option value="kk">Қазақша</option>
+      <option value="zh">中文</option>
+      <option value="es">Español</option>
+      <option value="de">Deutsch</option>
+      <option value="fr">Français</option>
+      <option value="tr">Türkçe</option>
+    </select>
+  </div>
+
+  <h1 data-i18n="app.h1">Проверка стабильности интернета</h1>
+  <p class="description" data-i18n="app.desc">Проверьте задержку, джиттер и потери пакетов вашего соединения</p>
+
+  <div class="card">
+
+    <div class="status-box" id="statusBox">
+      <div class="status" id="status"><span class="dot"></span><span id="statusText">Готово к тесту</span></div>
+      <div class="status-description" id="statusDescription">Выберите длительность и нажмите «Начать тест».</div>
+    </div>
+
+    <div class="duration-select" id="durationSelect">
+      <button data-duration="10" data-i18n="dur.sec">10 сек</button>
+      <button data-duration="30" class="active" data-i18n="dur.sec">30 сек</button>
+      <button data-duration="60" data-i18n="dur.sec">60 сек</button>
+    </div>
+
+    <div class="auto-repeat-row">
+      <label><input type="checkbox" id="autoRepeatToggle"> <span data-i18n="autorepeat">Автоповтор каждые 5 минут</span></label>
+    </div>
+
+    <div class="main-actions">
+      <button class="button" id="startBtn">Начать тест</button>
+      <select class="target-select" id="targetSelect" data-i18n-title="select.title" data-i18n-aria="select.title" title="Куда пинговать">
+        <option value="google">Google</option>
+        <option value="cloudflare">Cloudflare</option>
+        <option value="wikipedia">Wikipedia</option>
+      </select>
+    </div>
+
+    <div class="progress-wrap"><div class="progress-bar" id="progressBar"></div></div>
+    <div class="timer" id="timer">00:30</div>
+
+    <div class="results">
+      <div class="result"><div class="result-title" data-i18n="res.min">Мин. ping</div><div class="result-value" id="minPing">— ms</div></div>
+      <div class="result"><div class="result-title" data-i18n="res.avg">Средний ping</div><div class="result-value" id="avgPing">— ms</div><div id="avgDelta"></div></div>
+      <div class="result"><div class="result-title" data-i18n="res.max">Макс. ping</div><div class="result-value" id="maxPing">— ms</div></div>
+      <div class="result"><div class="result-title" data-i18n="res.loss">Потери</div><div class="result-value" id="packetLoss">— %</div><div id="lossDelta"></div></div>
+      <div class="result"><div class="result-title" data-i18n="res.jitter">Jitter</div><div class="result-value" id="jitter">— ms</div><div id="jitterDelta"></div></div>
+    </div>
+
+    <div class="chart-container"><canvas id="pingChart"></canvas></div>
+
+    <div class="section-title">
+      <span data-i18n="sect.export">Копировать / экспорт</span>
+      <span>
+        <button class="link-btn" id="copyBtn" data-i18n="btn.copy" disabled>Скопировать результат</button>
+        &nbsp;·&nbsp;
+        <button class="link-btn" id="shareBtn" data-i18n="btn.share" disabled>Поделиться</button>
+        &nbsp;·&nbsp;
+        <button class="link-btn" id="exportBtn" data-i18n="btn.exportCsv" disabled>Экспорт CSV</button>
+      </span>
+    </div>
+
+    <div class="section-title">
+      <span data-i18n="sect.history">История тестов</span>
+      <button class="link-btn" id="clearHistoryBtn" data-i18n="btn.clear">Очистить</button>
+    </div>
+    <div id="historyWrap"></div>
+
+    <div class="section-title"><span data-i18n="sect.advice">Рекомендации</span></div>
+    <div id="adviceBanner" class="advice-banner">Запустите тест — подскажем, что стоит проверить, исходя из результата.</div>
+    <ul class="advice-list" id="adviceList"></ul>
+
+    <div class="section-title"><span data-i18n="sect.glossary">Что означают эти показатели</span></div>
+    <div id="glossary">
+      <details class="glossary-item">
+        <summary data-i18n="gloss.ping.t">Ping (пинг)</summary>
+        <p data-i18n="gloss.ping.d"></p>
+      </details>
+      <details class="glossary-item">
+        <summary data-i18n="gloss.jitter.t">Jitter (джиттер)</summary>
+        <p data-i18n="gloss.jitter.d"></p>
+      </details>
+      <details class="glossary-item">
+        <summary data-i18n="gloss.loss.t">Потери пакетов (Packet Loss)</summary>
+        <p data-i18n="gloss.loss.d"></p>
+      </details>
+      <details class="glossary-item">
+        <summary data-i18n="gloss.minmax.t">Мин. / Макс. ping</summary>
+        <p data-i18n="gloss.minmax.d"></p>
+      </details>
+    </div>
+
+    <div class="section-title" style="margin-top:34px;"><span data-i18n="sect.extra">Дополнительно</span></div>
+    <details class="glossary-item">
+      <summary data-i18n="speed.summary">Тест скорости (download / upload)</summary>
+      <p class="secondary-note" data-i18n="speed.note">Необязательная проверка, не связана с основным тестом стабильности выше.</p>
+      <div class="secondary-actions" style="margin-top:12px;">
+        <button class="secondary-button" id="speedTestBtn">Запустить тест скорости</button>
+      </div>
+      <div class="results" style="margin-top:16px;">
+        <div class="result"><div class="result-title" data-i18n="speed.download">Download</div><div class="result-value" id="downloadSpeed">— Mbps</div></div>
+        <div class="result"><div class="result-title" data-i18n="speed.upload">Upload</div><div class="result-value" id="uploadSpeed">— Mbps</div></div>
+      </div>
+      <div class="secondary-note" id="speedStatus" style="text-align:center;margin-top:10px;"></div>
+    </details>
+
+  </div>
+
+  <footer class="site-footer">
+    <span data-i18n="footer.feedback">Feedback</span>:
+    <a href="mailto:zerohedaa@gmail.com">zerohedaa@gmail.com</a>
+  </footer>
+</div>
+
+<script src="i18n.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+(function () {
+
+  // ---------- i18n ----------
+  const i18n = window.__i18n;
+  const t = i18n.t;
+
+  // ---------- Elements ----------
+  const startBtn = document.getElementById("startBtn");
+  const timerElement = document.getElementById("timer");
+  const progressBar = document.getElementById("progressBar");
+
+  const minValue = document.getElementById("minPing");
+  const averageValue = document.getElementById("avgPing");
+  const maxValue = document.getElementById("maxPing");
+  const packetLossValue = document.getElementById("packetLoss");
+  const jitterValue = document.getElementById("jitter");
+
+  const statusBox = document.getElementById("statusBox");
+  const statusTextEl = document.getElementById("statusText");
+  const statusDescriptionEl = document.getElementById("statusDescription");
+
+  const durationSelect = document.getElementById("durationSelect");
+  const targetSelect = document.getElementById("targetSelect");
+  const copyBtn = document.getElementById("copyBtn");
+  const exportBtn = document.getElementById("exportBtn");
+  const clearHistoryBtn = document.getElementById("clearHistoryBtn");
+  const historyWrap = document.getElementById("historyWrap");
+  const adviceBanner = document.getElementById("adviceBanner");
+  const adviceList = document.getElementById("adviceList");
+  const autoRepeatToggle = document.getElementById("autoRepeatToggle");
+  const shareBtn = document.getElementById("shareBtn");
+  const avgDelta = document.getElementById("avgDelta");
+  const lossDelta = document.getElementById("lossDelta");
+  const jitterDelta = document.getElementById("jitterDelta");
+  const speedTestBtn = document.getElementById("speedTestBtn");
+  const downloadSpeedEl = document.getElementById("downloadSpeed");
+  const uploadSpeedEl = document.getElementById("uploadSpeed");
+  const speedStatusEl = document.getElementById("speedStatus");
+  const langSelect = document.getElementById("langSelect");
+
+  let selectedDuration = 30;
+  let lastResult = null;
+
+  // ---------- Duration selector ----------
+  durationSelect.addEventListener("click", function (e) {
+    const btn = e.target.closest("button[data-duration]");
+    if (!btn) return;
+    selectedDuration = parseInt(btn.dataset.duration, 10);
+    durationSelect.querySelectorAll("button").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    timerElement.textContent = "00:" + String(selectedDuration).padStart(2, "0");
+  });
+
+  // ---------- Auto-repeat (secondary, off by default) ----------
+  let autoRepeatInterval = null;
+
+  autoRepeatToggle.addEventListener("change", function () {
+    if (autoRepeatToggle.checked) {
+      autoRepeatInterval = setInterval(function () {
+        if (!startBtn.disabled) startBtn.click();
+      }, 5 * 60 * 1000);
+    } else if (autoRepeatInterval) {
+      clearInterval(autoRepeatInterval);
+      autoRepeatInterval = null;
+    }
+  });
+
+
+  const STATUS_STYLE = {
+    idle: ["var(--status-idle)", "var(--status-idle-text)"],
+    running: ["var(--status-running)", "var(--status-running-text)"],
+    excellent: ["var(--status-excellent)", "var(--status-excellent-text)"],
+    good: ["var(--status-good)", "var(--status-good-text)"],
+    fair: ["var(--status-fair)", "var(--status-fair-text)"],
+    poor: ["var(--status-poor)", "var(--status-poor-text)"]
+  };
+
+  // Храним не готовый текст, а ключи — чтобы перерисовать статус при смене языка.
+  let statusState = {
+    kind: "idle",
+    titleKey: "status.idle.title",
+    descKey: "status.idle.desc",
+    params: null,
+    descSuffixKey: null
+  };
+
+  function renderStatus() {
+    const [bg, color] = STATUS_STYLE[statusState.kind] || STATUS_STYLE.idle;
+    statusBox.style.background = bg;
+    statusBox.style.color = color;
+    statusTextEl.textContent = t(statusState.titleKey);
+    statusDescriptionEl.textContent =
+      t(statusState.descKey, statusState.params) +
+      (statusState.descSuffixKey ? t(statusState.descSuffixKey) : "");
+  }
+
+  function setStatus(kind, titleKey, descKey, params, descSuffixKey) {
+    statusState = {
+      kind: kind,
+      titleKey: titleKey,
+      descKey: descKey,
+      params: params || null,
+      descSuffixKey: descSuffixKey || null
+    };
+    renderStatus();
+  }
+
+  // Замер идёт через HTTP-запрос, а не через ICMP-ping, поэтому он всегда чуть выше
+  // «настоящего» пинга. Пороги подобраны с учётом этого.
+  function evaluateConnection(average, jitter, packetLoss) {
+    if (packetLoss >= 15) {
+      return ["poor", "eval.poor.t", "eval.lossPoor.d"];
+    }
+    if (average < 80 && jitter < 30 && packetLoss <= 1) {
+      return ["excellent", "eval.excellent.t", "eval.excellent.d"];
+    }
+    if (average < 150 && jitter < 60 && packetLoss < 5) {
+      return ["good", "eval.good.t", "eval.good.d"];
+    }
+    if (average < 300 && packetLoss < 15) {
+      return ["fair", "eval.fair.t", "eval.fair.d"];
+    }
+    return ["poor", "eval.poor.t", "eval.poor.d"];
+  }
+
+  function resetResults() {
+    minValue.textContent = "— ms";
+    averageValue.textContent = "— ms";
+    maxValue.textContent = "— ms";
+    packetLossValue.textContent = "— %";
+    jitterValue.textContent = "— ms";
+    avgDelta.innerHTML = "";
+    jitterDelta.innerHTML = "";
+    lossDelta.innerHTML = "";
+  }
+
+  // ---------- Chart ----------
+  const chart = typeof Chart === "undefined" ? null : new Chart(document.getElementById("pingChart"), {
+    type: "line",
+    data: {
+      labels: [],
+      datasets: [{
+        label: t("chart.label"),
+        data: [],
+        tension: 0.3,
+        pointRadius: 2,
+        borderColor: "#2563eb",
+        backgroundColor: "rgba(37, 99, 235, 0.12)"
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: false, title: { display: true, text: t("chart.y") } },
+        x: { title: { display: true, text: t("chart.x") } }
+      }
+    }
+  });
+
+  // Секунды храним отдельно, чтобы пересобрать подписи оси X при смене языка.
+  let chartSeconds = [];
+
+  function chartReset() {
+    chartSeconds = [];
+    if (!chart) return;
+    chart.data.labels = [];
+    chart.data.datasets[0].data = [];
+    chart.update();
+  }
+
+  function chartPush(seconds, value) {
+    chartSeconds.push(seconds);
+    if (!chart) return;
+    chart.data.labels.push(seconds + t("chart.secSuffix"));
+    chart.data.datasets[0].data.push(value);
+    chart.update();
+  }
+
+  function chartApplyLang() {
+    if (!chart) return;
+    chart.data.datasets[0].label = t("chart.label");
+    chart.options.scales.y.title.text = t("chart.y");
+    chart.options.scales.x.title.text = t("chart.x");
+    chart.data.labels = chartSeconds.map(function (sec) { return sec + t("chart.secSuffix"); });
+    chart.update();
+  }
+
+  // ---------- Endpoints ----------
+  // Лёгкие «edge»-адреса отвечают мгновенно с ближайшего узла CDN, поэтому
+  // замер отражает сеть, а не время работы сервера.
+  // bust: true  -> добавляем случайный параметр (ответ всё равно генерируется на edge).
+  // bust: false -> статичный файл на CDN: случайный параметр превратил бы КАЖДЫЙ запрос
+  //                в промах кэша с обращением к origin (медленно и с огромным разбросом),
+  //                а это выглядело как «нестабильный интернет». Кэш браузера и так
+  //                отключён через cache: "no-store".
+  const TARGETS = {
+    google:     { label: "Google",     url: "https://www.gstatic.com/generate_204",                    bust: true  },
+    cloudflare: { label: "Cloudflare", url: "https://www.cloudflare.com/cdn-cgi/trace",                bust: true  },
+    wikipedia:  { label: "Wikipedia",  url: "https://www.wikipedia.org/static/favicon/wikipedia.ico", bust: false }
+  };
+
+  const PING_TIMEOUT_MS = 3000;   // дольше этого запрос считается потерянным
+  const WARMUP_TIMEOUT_MS = 4000;
+
+  let ENDPOINTS = [];             // только реально отвечающие серверы
+  let activeEndpointIndex = 0;
+  let consecutiveFailures = 0;
+  let usingFallback = false;      // true, если внешние сайты недоступны и пингуем сервер самой страницы
+
+  function sameOriginTarget() {
+    if (location.protocol !== "http:" && location.protocol !== "https:") return null;
+    return { label: t("fallback.serverLabel"), url: location.href.split("#")[0], bust: true };
+  }
+
+  function withBust(target) {
+    if (!target.bust) return target.url;
+    return target.url + (target.url.indexOf("?") === -1 ? "?" : "&") + "_=" + Math.random().toString(36).slice(2);
+  }
+
+  // Один замер. Возвращает миллисекунды или null (ошибка / таймаут).
+  async function timedRequest(target, timeoutMs) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    const start = performance.now();
+    try {
+      await fetch(withBust(target), {
+        method: "HEAD",
+        mode: "no-cors",
+        cache: "no-store",
+        credentials: "omit",
+        signal: controller.signal
+      });
+      return Math.max(1, Math.round(performance.now() - start));
+    } catch (e) {
+      return null;
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  async function measureOnce() {
+    const target = ENDPOINTS[activeEndpointIndex % ENDPOINTS.length];
+    const ms = await timedRequest(target, PING_TIMEOUT_MS);
+
+    if (ms !== null) {
+      consecutiveFailures = 0;
+      return ms;
+    }
+
+    consecutiveFailures++;
+    // Меняем сервер только после нескольких подряд неудач, а не при каждой.
+    if (consecutiveFailures >= 3 && ENDPOINTS.length > 1) {
+      activeEndpointIndex++;
+      consecutiveFailures = 0;
+    }
+    return null;
+  }
+
+  // Прогрев перед тестом (в результаты не входит): оплачивает DNS/TCP/TLS и проверяет,
+  // какие серверы вообще отвечают. Недоступный сервер больше не превращается в «потери пакетов».
+  // Возвращает true, если есть хотя бы один рабочий сервер.
+  async function warmUpConnection() {
+    const chosenKey = (targetSelect.value in TARGETS) ? targetSelect.value : "google";
+    const ordered = [TARGETS[chosenKey]].concat(
+      Object.keys(TARGETS).filter(k => k !== chosenKey).map(k => TARGETS[k])
+    );
+
+    async function probe(target) {
+      let ms = await timedRequest(target, WARMUP_TIMEOUT_MS);
+      if (ms === null) ms = await timedRequest(target, WARMUP_TIMEOUT_MS); // вторая попытка
+      return ms !== null;
+    }
+
+    const results = await Promise.all(ordered.map(probe));
+    let alive = ordered.filter((t, i) => results[i]);
+
+    usingFallback = false;
+    if (alive.length === 0) {
+      const own = sameOriginTarget();
+      if (own && await probe(own)) {
+        alive = [own];
+        usingFallback = true;
+      }
+    }
+
+    ENDPOINTS = alive;
+    activeEndpointIndex = 0;
+    consecutiveFailures = 0;
+    return alive.length > 0;
+  }
+
+  // ---------- History (localStorage, per-viewer) ----------
+  const HISTORY_KEY = "netStabilityHistory";
+  const HISTORY_MAX = 100;              // сколько тестов храним
+  const HISTORY_COLLAPSED = 5;          // сколько показываем по умолчанию
+  const HISTORY_EXPANDED_VISIBLE = 15;  // сколько строк видно сразу в полной истории
+  let historyExpanded = false;
+
+  function loadHistory() {
+    try {
+      const raw = localStorage.getItem(HISTORY_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function saveHistory(list) {
+    try {
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(list.slice(0, HISTORY_MAX)));
+    } catch (e) { /* storage unavailable, ignore */ }
+  }
+
+  function qualityLabel(kind) {
+    const map = {
+      excellent: ["q.excellent", "var(--status-excellent)", "var(--status-excellent-text)"],
+      good: ["q.good", "var(--status-good)", "var(--status-good-text)"],
+      fair: ["q.fair", "var(--status-fair)", "var(--status-fair-text)"],
+      poor: ["q.poor", "var(--status-poor)", "var(--status-poor-text)"]
+    };
+    const entry = map[kind];
+    if (!entry) return ["—", "var(--status-idle)", "var(--status-idle-text)"];
+    return [t(entry[0]), entry[1], entry[2]];
+  }
+
+  // Время теста хранится как timestamp — форматируем в текущей локали.
+  // Старые записи (без ts) показываем так, как они были сохранены.
+  function formatTime(ts) {
+    return new Date(ts).toLocaleString(i18n.locale, {
+      day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit"
+    });
+  }
+
+  function historyTime(h) {
+    return h.ts ? formatTime(h.ts) : h.time;
+  }
+
+  function renderHistory() {
+    const history = loadHistory();
+    if (history.length === 0) {
+      historyExpanded = false;
+      historyWrap.innerHTML = '<div class="empty-history">' + t("history.empty") + "</div>";
+      exportBtn.disabled = true;
+      return;
+    }
+    exportBtn.disabled = !window.__downloadsReady;
+
+    const canExpand = history.length > HISTORY_COLLAPSED;
+    if (!canExpand) historyExpanded = false;
+    const shown = historyExpanded ? history : history.slice(0, HISTORY_COLLAPSED);
+
+    const rows = shown.map(function (h) {
+      const [label, bg, color] = qualityLabel(h.kind);
+      return "<tr>" +
+        "<td>" + historyTime(h) + "</td>" +
+        "<td>" + h.avg + " ms</td>" +
+        "<td>" + h.jitter + " ms</td>" +
+        "<td>" + h.loss + " %</td>" +
+        '<td><span class="quality-pill" style="background:' + bg + ";color:" + color + '">' + label + "</span></td>" +
+        "</tr>";
+    }).join("");
+
+    const table =
+      '<table class="history"><thead><tr>' +
+      "<th>" + t("history.th.time") + "</th>" +
+      "<th>" + t("history.th.ping") + "</th>" +
+      "<th>" + t("history.th.jitter") + "</th>" +
+      "<th>" + t("history.th.loss") + "</th>" +
+      "<th>" + t("history.th.quality") + "</th>" +
+      "</tr></thead><tbody>" + rows + "</tbody></table>";
+
+    let html = historyExpanded
+      ? '<div class="history-scroll" id="historyScroll" tabindex="0" role="region" aria-label="' +
+        t("history.aria") + '">' + table + "</div>"
+      : table;
+
+    if (canExpand) {
+      html += '<div class="history-toggle"><button class="secondary-button" id="historyToggleBtn" aria-expanded="' +
+        (historyExpanded ? "true" : "false") + '">' +
+        (historyExpanded
+          ? t("history.collapse", { n: HISTORY_COLLAPSED })
+          : t("history.showAll", { n: history.length })) +
+        "</button></div>";
+    }
+
+    historyWrap.innerHTML = html;
+    if (historyExpanded) fitHistoryScroll();
+  }
+
+  // Высота окна = шапка + ровно 15 строк. Если записей больше — появляется прокрутка.
+  function fitHistoryScroll() {
+    const box = document.getElementById("historyScroll");
+    if (!box) return;
+    const table = box.querySelector("table");
+    const bodyRows = table.tBodies[0].rows;
+    if (bodyRows.length <= HISTORY_EXPANDED_VISIBLE) {
+      box.style.maxHeight = "";
+      return;
+    }
+    let h = table.tHead.offsetHeight;
+    for (let i = 0; i < HISTORY_EXPANDED_VISIBLE; i++) h += bodyRows[i].offsetHeight;
+    box.style.maxHeight = (h + 2) + "px";
+  }
+
+  window.addEventListener("resize", fitHistoryScroll);
+
+  historyWrap.addEventListener("click", function (e) {
+    const btn = e.target.closest("#historyToggleBtn");
+    if (!btn) return;
+    historyExpanded = !historyExpanded;
+    renderHistory();
+  });
+
+  clearHistoryBtn.addEventListener("click", function () {
+    try { localStorage.removeItem(HISTORY_KEY); } catch (e) {}
+    renderHistory();
+  });
+
+  // ---------- Compare with previous test ----------
+  function renderDelta(el, current, previous, unit) {
+    if (previous === undefined || previous === null) {
+      el.innerHTML = "";
+      return;
+    }
+    const diff = current - previous;
+    if (diff === 0) {
+      el.innerHTML = '<span class="delta same">= ' + unit + '</span>';
+      return;
+    }
+    const better = diff < 0; // lower is better for ping/jitter/loss
+    const cls = better ? "better" : "worse";
+    const arrow = better ? "▼" : "▲";
+    el.innerHTML = '<span class="delta ' + cls + '">' + arrow + " " + Math.abs(diff) + " " + unit + "</span>";
+  }
+
+  // ---------- Copy result ----------
+  copyBtn.addEventListener("click", async function () {
+    if (!lastResult) return;
+    const text =
+      t("copy.header", { time: historyTime(lastResult) }) + "\n" +
+      t("copy.avg", { v: lastResult.avg }) + "\n" +
+      t("copy.minmax", { min: lastResult.min, max: lastResult.max }) + "\n" +
+      t("copy.jitter", { v: lastResult.jitter }) + "\n" +
+      t("copy.loss", { v: lastResult.loss }) + "\n" +
+      t("copy.quality", { v: qualityLabel(lastResult.kind)[0] });
+    try {
+      await navigator.clipboard.writeText(text);
+      copyBtn.textContent = t("toast.copied");
+      setTimeout(() => { copyBtn.textContent = t("btn.copy"); }, 1500);
+    } catch (e) {
+      // clipboard unavailable — silently ignore
+    }
+  });
+
+  // ---------- Share result ----------
+  shareBtn.addEventListener("click", async function () {
+    if (!lastResult) return;
+    const text = t("share.text", {
+      time: historyTime(lastResult),
+      avg: lastResult.avg,
+      jitter: lastResult.jitter,
+      loss: lastResult.loss,
+      quality: qualityLabel(lastResult.kind)[0]
+    });
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ text: text });
+      } catch (e) {
+        // viewer cancelled share — no action needed
+      }
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(text);
+      shareBtn.textContent = t("toast.copied");
+      setTimeout(() => { shareBtn.textContent = t("btn.share"); }, 1500);
+    } catch (e) {
+      // clipboard unavailable — silently ignore
+    }
+  });
+
+  // ---------- Export CSV via downloads capability ----------
+  window.__downloadsReady = false;
+  let downloadsApi = null;
+
+  (async function initDownloads() {
+    try {
+      if (window.claude && typeof window.claude.use === "function") {
+        downloadsApi = await window.claude.use("downloads");
+      }
+    } catch (e) {
+      downloadsApi = null;
+    }
+    window.__downloadsReady = !!downloadsApi;
+    renderHistory();
+  })();
+
+  exportBtn.addEventListener("click", async function () {
+    if (!downloadsApi) return;
+    const history = loadHistory();
+    if (history.length === 0) return;
+
+    let csv = "time,avg_ms,min_ms,max_ms,jitter_ms,loss_percent,quality\n";
+    history.forEach(function (h) {
+      csv += ['"' + historyTime(h) + '"', h.avg, h.min, h.max, h.jitter, h.loss,
+              '"' + qualityLabel(h.kind)[0] + '"'].join(",") + "\n";
+    });
+
+    try {
+      await downloadsApi.save({ filename: "internet-stability-history.csv", data: csv });
+    } catch (e) {
+      // viewer declined or save unavailable — no further action needed
+    }
+  });
+
+  // ---------- Recommendations ----------
+  const ADVICE_ITEMS = [
+    { key: "advice.1", tags: ["poor", "fair"] },
+    { key: "advice.2", tags: ["poor", "fair"] },
+    { key: "advice.3", tags: ["poor", "fair", "good"] },
+    { key: "advice.4", tags: ["poor", "fair"] },
+    { key: "advice.5", tags: ["poor", "fair"] },
+    { key: "advice.6", tags: ["poor", "fair"] },
+    { key: "advice.7", tags: ["poor"] }
+  ];
+
+  const ADVICE_BANNER_KEY = {
+    excellent: "advice.banner.excellent",
+    good: "advice.banner.good",
+    fair: "advice.banner.fair",
+    poor: "advice.banner.poor"
+  };
+
+  let adviceKind = null;   // null = тест ещё не запускали
+
+  function escapeHtml(str) {
+    return String(str)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function renderRecommendations(kind) {
+    if (kind !== undefined) adviceKind = kind;
+
+    if (adviceKind === null) {
+      adviceBanner.textContent = t("advice.default");
+      adviceList.innerHTML = "";
+      return;
+    }
+
+    adviceBanner.textContent = t(ADVICE_BANNER_KEY[adviceKind] || ADVICE_BANNER_KEY.good);
+
+    if (adviceKind === "excellent") {
+      adviceList.innerHTML = "";
+      return;
+    }
+
+    const relevant = ADVICE_ITEMS.filter(item => item.tags.includes(adviceKind));
+    adviceList.innerHTML = relevant.map(function (item, i) {
+      return '<li><span class="num">' + (i + 1) + "</span><span>" + escapeHtml(t(item.key)) + "</span></li>";
+    }).join("");
+  }
+
+  // ---------- Speed test (secondary, optional) ----------
+  async function measureDownloadSpeed() {
+    const bytes = 5000000;
+    const url = "https://speed.cloudflare.com/__down?bytes=" + bytes + "&cachebust=" + Math.random();
+    const start = performance.now();
+    const res = await fetch(url, { cache: "no-store" });
+    const blob = await res.blob();
+    const seconds = (performance.now() - start) / 1000;
+    return (blob.size * 8) / seconds / 1000000;
+  }
+
+  async function measureUploadSpeed() {
+    const bytes = 2000000;
+    const data = new Uint8Array(bytes);
+    const start = performance.now();
+    await fetch("https://speed.cloudflare.com/__up", { method: "POST", body: data });
+    const seconds = (performance.now() - start) / 1000;
+    return (bytes * 8) / seconds / 1000000;
+  }
+
+  let speedStatusKey = null;   // чтобы перевести текущее сообщение при смене языка
+
+  function setSpeedStatus(key) {
+    speedStatusKey = key;
+    speedStatusEl.textContent = key ? t(key) : "";
+  }
+
+  speedTestBtn.addEventListener("click", async function () {
+    speedTestBtn.disabled = true;
+    speedTestBtn.textContent = t("speed.btnRunning");
+    downloadSpeedEl.textContent = "— Mbps";
+    uploadSpeedEl.textContent = "— Mbps";
+    setSpeedStatus("speed.measuringDown");
+
+    try {
+      const down = await measureDownloadSpeed();
+      downloadSpeedEl.textContent = down.toFixed(1) + " Mbps";
+
+      setSpeedStatus("speed.measuringUp");
+      const up = await measureUploadSpeed();
+      uploadSpeedEl.textContent = up.toFixed(1) + " Mbps";
+
+      setSpeedStatus("speed.done");
+    } catch (e) {
+      setSpeedStatus("speed.error");
+    }
+
+    speedTestBtn.disabled = false;
+    speedTestBtn.textContent = t("speed.btn");
+  });
+
+  // ---------- Main test ----------
+  function unlockControls() {
+    durationSelect.querySelectorAll("button").forEach(b => b.disabled = false);
+    targetSelect.disabled = false;
+    startBtn.textContent = t("btn.start");
+    startBtn.disabled = false;
+    copyBtn.disabled = !lastResult;
+    shareBtn.disabled = !lastResult;
+  }
+
+  startBtn.addEventListener("click", async function () {
+
+    startBtn.textContent = t("btn.running");
+    startBtn.disabled = true;
+    durationSelect.querySelectorAll("button").forEach(b => b.disabled = true);
+    targetSelect.disabled = true;
+    copyBtn.disabled = true;
+    shareBtn.disabled = true;
+
+    resetResults();
+    setStatus("running", "run.title", "run.checking");
+
+    let pings = [];
+    let failed = 0;
+
+    const testDuration = selectedDuration;
+
+    chartReset();
+
+    timerElement.textContent = "00:" + String(testDuration).padStart(2, "0");
+    progressBar.style.width = "0%";
+
+    const reachable = await warmUpConnection();
+
+    if (!reachable) {
+      unlockControls();
+      const offline = navigator.onLine === false;
+      setStatus("poor", "err.noConn.title", offline ? "err.offline" : "err.blocked");
+      return;
+    }
+
+    const chosen = TARGETS[targetSelect.value] || TARGETS.google;
+    let noteKey;
+    if (usingFallback) {
+      noteKey = "run.fallback";
+    } else if (ENDPOINTS[0].label !== chosen.label) {
+      noteKey = "run.otherServer";
+    } else {
+      noteKey = "run.measuring";
+    }
+    setStatus("running", "run.title", noteKey, { server: ENDPOINTS[0].label });
+
+    const startTime = Date.now();
+
+    const timerInterval = setInterval(function () {
+      const elapsed = Math.floor((Date.now() - startTime) / 1000);
+      const remaining = Math.max(0, testDuration - elapsed);
+      timerElement.textContent = "00:" + String(remaining).padStart(2, "0");
+      progressBar.style.width = Math.min(100, (elapsed / testDuration) * 100) + "%";
+    }, 250);
+
+    while (Date.now() - startTime < testDuration * 1000) {
+      const ping = await measureOnce();
+
+      if (ping !== null) {
+        pings.push(ping);
+        const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+        chartPush(elapsed, ping);
+      } else {
+        failed++;
+      }
+
+      await new Promise(resolve => setTimeout(resolve, 300));
+    }
+
+    clearInterval(timerInterval);
+    timerElement.textContent = "00:00";
+    progressBar.style.width = "100%";
+
+    if (pings.length === 0) {
+      unlockControls();
+      setStatus("poor", "err.noConn.title", "err.noMeasure");
+      return;
+    }
+
+    const min = Math.min(...pings);
+    const max = Math.max(...pings);
+    const average = Math.round(pings.reduce((s, v) => s + v, 0) / pings.length);
+
+    let jitter = 0;
+    if (pings.length > 1) {
+      const diffs = [];
+      for (let i = 1; i < pings.length; i++) diffs.push(Math.abs(pings[i] - pings[i - 1]));
+      jitter = Math.round(diffs.reduce((s, v) => s + v, 0) / diffs.length);
+    }
+
+    const total = pings.length + failed;
+    const packetLoss = total > 0 ? Math.round((failed / total) * 100) : 0;
+
+    minValue.textContent = min + " ms";
+    averageValue.textContent = average + " ms";
+    maxValue.textContent = max + " ms";
+    packetLossValue.textContent = packetLoss + " %";
+    jitterValue.textContent = jitter + " ms";
+
+    const [kind, titleKey, descKey] = evaluateConnection(average, jitter, packetLoss);
+    setStatus(kind, titleKey, descKey, null, usingFallback ? "result.fallbackNote" : null);
+    renderRecommendations(kind);
+
+    const now = Date.now();
+    const timeLabel = formatTime(now);
+
+    const history = loadHistory();
+    const previous = history[0];
+
+    renderDelta(avgDelta, average, previous ? previous.avg : null, "ms");
+    renderDelta(jitterDelta, jitter, previous ? previous.jitter : null, "ms");
+    renderDelta(lossDelta, packetLoss, previous ? previous.loss : null, "%");
+
+    lastResult = { ts: now, time: timeLabel, avg: average, min, max, jitter, loss: packetLoss, kind };
+
+    history.unshift(lastResult);
+    saveHistory(history);
+    renderHistory();
+
+    unlockControls();
+  });
+
+  // ---------- Language switching (без перезагрузки страницы) ----------
+  // Статические подписи обновляет сам рантайм i18n; здесь перерисовываем
+  // только то, что генерируется скриптом.
+  function applyLanguage() {
+    renderStatus();
+    renderHistory();
+    renderRecommendations();
+    chartApplyLang();
+
+    startBtn.textContent = t(startBtn.disabled ? "btn.running" : "btn.start");
+    speedTestBtn.textContent = t(speedTestBtn.disabled ? "speed.btnRunning" : "speed.btn");
+    speedStatusEl.textContent = speedStatusKey ? t(speedStatusKey) : "";
+  }
+
+  i18n.onChange(applyLanguage);
+
+  // ---------- Init ----------
+  if (langSelect) langSelect.value = i18n.lang;
+  applyLanguage();
+
+})();
+</script>
+</body>
+</html>

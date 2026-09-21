@@ -9,6 +9,7 @@ ru: {
   "app.title": "Проверка стабильности интернета",
   "app.h1": "Проверка стабильности интернета",
   "app.desc": "Проверьте задержку, джиттер и потери пакетов вашего соединения",
+  "seo.description": "Бесплатный онлайн-тест стабильности интернета: измерьте ping, джиттер и потери пакетов прямо в браузере. График в реальном времени, история тестов и советы по улучшению связи.",
   "status.idle.title": "Готово к тесту",
   "status.idle.desc": "Выберите длительность и нажмите «Начать тест».",
   "dur.sec": "{n} сек",
@@ -93,6 +94,7 @@ en: {
   "app.title": "Internet Stability Test",
   "app.h1": "Internet Stability Test",
   "app.desc": "Check the latency, jitter and packet loss of your connection",
+  "seo.description": "Free online internet stability test: measure ping, jitter and packet loss right in your browser. Live chart, test history and tips to fix an unstable connection.",
   "status.idle.title": "Ready to test",
   "status.idle.desc": "Pick a duration and press “Start test”.",
   "dur.sec": "{n} sec",
@@ -177,6 +179,7 @@ kk: {
   "app.title": "Интернет тұрақтылығын тексеру",
   "app.h1": "Интернет тұрақтылығын тексеру",
   "app.desc": "Байланысыңыздың кідірісін, джиттерін және пакет жоғалтуын тексеріңіз",
+  "seo.description": "Интернет тұрақтылығын тегін онлайн тексеру: браузерде ping, джиттер және пакет жоғалтуын өлшеңіз. Нақты уақыттағы график, тест тарихы және кеңестер.",
   "status.idle.title": "Тестке дайын",
   "status.idle.desc": "Ұзақтығын таңдап, «Тестті бастау» түймесін басыңыз.",
   "dur.sec": "{n} сек",
@@ -258,9 +261,10 @@ kk: {
 
 zh: {
   "html.lang": "zh-CN", "locale": "zh-CN", "lang.name": "中文", "lang.aria": "界面语言",
-  "app.title": "网络稳定性测试",
+  "app.title": "互联网稳定性测试",
   "app.h1": "网络稳定性测试",
   "app.desc": "检测您网络连接的延迟、抖动和丢包率",
+  "seo.description": "免费在线互联网稳定性测试：直接在浏览器中测量延迟、抖动和丢包率。实时图表、测试历史记录以及改善连接的建议。",
   "status.idle.title": "准备就绪",
   "status.idle.desc": "请选择测试时长并点击“开始测试”。",
   "dur.sec": "{n} 秒",
@@ -341,9 +345,10 @@ zh: {
 },
 es: {
   "html.lang": "es", "locale": "es-ES", "lang.name": "Español", "lang.aria": "Idioma de la interfaz",
-  "app.title": "Test de estabilidad de Internet",
+  "app.title": "Prueba de estabilidad de Internet",
   "app.h1": "Test de estabilidad de Internet",
   "app.desc": "Comprueba la latencia, el jitter y la pérdida de paquetes de tu conexión",
+  "seo.description": "Prueba gratuita de estabilidad de Internet: mide el ping, el jitter y la pérdida de paquetes en tu navegador. Gráfico en vivo, historial y consejos para mejorar.",
   "status.idle.title": "Listo para la prueba",
   "status.idle.desc": "Elige la duración y pulsa «Iniciar prueba».",
   "dur.sec": "{n} s",
@@ -428,6 +433,7 @@ de: {
   "app.title": "Internet-Stabilitätstest",
   "app.h1": "Internet-Stabilitätstest",
   "app.desc": "Prüfen Sie Latenz, Jitter und Paketverlust Ihrer Verbindung",
+  "seo.description": "Kostenloser Online-Test für Internet-Stabilität: Ping, Jitter und Paketverlust direkt im Browser messen. Live-Diagramm, Testverlauf und Tipps zur Verbesserung.",
   "status.idle.title": "Bereit für den Test",
   "status.idle.desc": "Dauer wählen und auf „Test starten“ klicken.",
   "dur.sec": "{n} Sek.",
@@ -509,9 +515,10 @@ de: {
 
 fr: {
   "html.lang": "fr", "locale": "fr-FR", "lang.name": "Français", "lang.aria": "Langue de l'interface",
-  "app.title": "Test de stabilité Internet",
+  "app.title": "Test de stabilité d’Internet",
   "app.h1": "Test de stabilité Internet",
   "app.desc": "Vérifiez la latence, la gigue et la perte de paquets de votre connexion",
+  "seo.description": "Test gratuit de stabilité d’Internet : mesurez le ping, la gigue et la perte de paquets dans votre navigateur. Graphique en direct, historique et conseils.",
   "status.idle.title": "Prêt pour le test",
   "status.idle.desc": "Choisissez la durée et cliquez sur « Démarrer le test ».",
   "dur.sec": "{n} s",
@@ -593,9 +600,10 @@ fr: {
 
 tr: {
   "html.lang": "tr", "locale": "tr-TR", "lang.name": "Türkçe", "lang.aria": "Arayüz dili",
-  "app.title": "İnternet Kararlılık Testi",
+  "app.title": "İnternet Stabilite Testi",
   "app.h1": "İnternet Kararlılık Testi",
   "app.desc": "Bağlantınızın gecikmesini, jitter değerini ve paket kaybını ölçün",
+  "seo.description": "Ücretsiz çevrimiçi internet stabilite testi: ping, jitter ve paket kaybını tarayıcınızda ölçün. Canlı grafik, test geçmişi ve bağlantıyı iyileştirme ipuçları.",
   "status.idle.title": "Teste hazır",
   "status.idle.desc": "Süreyi seçin ve „Testi başlat“ düğmesine basın.",
   "dur.sec": "{n} sn",
@@ -686,6 +694,35 @@ tr: {
   var listeners = [];
   var current = FALLBACK;
 
+  // SEO-версии живут по адресам /test/<lang>/ — отсюда берём язык и базовый путь.
+  // Базовый путь вычисляется, а не задаётся жёстко: проект одинаково работает
+  // и в корне домена, и в подпапке (GitHub Pages вида /<repo>/).
+  var LANG_PATH_RE = /^(.*?)\/test\/(ru|en|kk|zh|es|de|fr|tr)\/(?:index\.html)?$/;
+
+  var OG_LOCALE = {
+    ru: "ru_RU", en: "en_US", kk: "kk_KZ", zh: "zh_CN",
+    es: "es_ES", de: "de_DE", fr: "fr_FR", tr: "tr_TR"
+  };
+
+  function pathInfo() {
+    var path = location.pathname;
+    var m = path.match(LANG_PATH_RE);
+    if (m) return { base: m[1], lang: m[2] };
+    return { base: path.replace(/\/[^\/]*$/, ""), lang: null };
+  }
+
+  // Язык, заданный самой страницей: атрибут data-seo-lang или путь /test/<lang>/
+  function pageLang() {
+    var attr = document.documentElement.getAttribute("data-seo-lang");
+    if (attr && SUPPORTED.indexOf(attr) !== -1) return attr;
+    var info = pathInfo();
+    return info.lang;
+  }
+
+  function langUrl(lang) {
+    return location.origin + pathInfo().base + "/test/" + lang + "/";
+  }
+
   function normalize(tag) {
     if (!tag) return null;
     var lower = String(tag).toLowerCase();
@@ -697,6 +734,11 @@ tr: {
   }
 
   function detect() {
+    // 1) Язык языковой версии URL — пользователь (или поисковик) пришёл именно за ним.
+    var fromPage = pageLang();
+    if (fromPage) return fromPage;
+
+    // 2) Ранее сохранённый выбор.
     var saved = null;
     try { saved = localStorage.getItem(STORAGE_KEY); } catch (e) { saved = null; }
     if (saved && SUPPORTED.indexOf(saved) !== -1) return saved;
@@ -743,8 +785,68 @@ tr: {
       el.setAttribute("aria-label", t(el.getAttribute("data-i18n-aria")));
     });
 
-    document.title = t("app.title");
+    updateSeo();
+  }
+
+  // ---------- SEO: title, description, lang, canonical, Open Graph ----------
+  function setMeta(selector, attrName, attrValue, content) {
+    var el = document.head && document.head.querySelector(selector);
+    if (!el) {
+      if (!document.head) return;
+      el = document.createElement("meta");
+      el.setAttribute(attrName, attrValue);
+      document.head.appendChild(el);
+    }
+    el.setAttribute("content", content);
+  }
+
+  function setLink(rel, href) {
+    var el = document.head && document.head.querySelector('link[rel="' + rel + '"]');
+    if (!el) {
+      if (!document.head) return;
+      el = document.createElement("link");
+      el.setAttribute("rel", rel);
+      document.head.appendChild(el);
+    }
+    el.setAttribute("href", href);
+  }
+
+  function updateSeo() {
+    var title = t("app.title");
+    var description = t("seo.description");
+
+    document.title = title;
     document.documentElement.setAttribute("lang", t("html.lang"));
+
+    setMeta('meta[name="description"]', "name", "description", description);
+    setMeta('meta[property="og:title"]', "property", "og:title", title);
+    setMeta('meta[property="og:description"]', "property", "og:description", description);
+    setMeta('meta[property="og:locale"]', "property", "og:locale", OG_LOCALE[current] || "en_US");
+    setMeta('meta[name="twitter:title"]', "name", "twitter:title", title);
+    setMeta('meta[name="twitter:description"]', "name", "twitter:description", description);
+
+    // На языковых версиях canonical следует за выбранным языком.
+    // В корне canonical остаётся корневым — это x-default.
+    var info = pathInfo();
+    if (info.lang) {
+      var url = langUrl(current);
+      setLink("canonical", url);
+      setMeta('meta[property="og:url"]', "property", "og:url", url);
+    }
+  }
+
+  // Смена языка на /test/<lang>/ меняет и адрес — без перезагрузки страницы.
+  function syncUrl() {
+    var info = pathInfo();
+    if (!info.lang || info.lang === current) return;
+    document.documentElement.setAttribute("data-seo-lang", current);
+    if (!window.history || typeof history.replaceState !== "function") return;
+    try {
+      history.replaceState(history.state, "",
+        info.base + "/test/" + current + "/" + location.search + location.hash);
+    } catch (e) {
+      // file:// или иные ограничения — адрес просто останется прежним
+    }
   }
 
   function setLang(lang, persist) {
@@ -753,6 +855,7 @@ tr: {
     if (persist !== false) {
       try { localStorage.setItem(STORAGE_KEY, lang); } catch (e) { /* storage off */ }
     }
+    syncUrl();
     applyStatic();
     var select = document.getElementById("langSelect");
     if (select && select.value !== lang) select.value = lang;
